@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allocazione_Lotti_Q4.xlsx - Excel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* ===== vista gioco ===== */
+body.vg{background:#1b1712;color:#f3e6c8}
+.g{max-width:980px;margin:0 auto;padding:12px 16px 40px}
+.gh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.gh b{font-size:20px;color:#e8c55a}
+.pill{background:#3a2f22;border:1px solid #6b5536;border-radius:20px;padding:2px 10px;font-size:13px;margin-left:6px}
+.g button{background:#c9a227;color:#1b1712;border:0;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer;font-size:14px;font-family:inherit}
+.g button:disabled{opacity:.4;cursor:default}
+.hb{display:flex;gap:6px}
+.hb button{background:#3a2f22;color:#f3e6c8;border:1px solid #6b5536;padding:6px 10px;font-size:13px}
+.nave{color:#b9a580;font-style:italic;margin:8px 0}
+.stato{background:#2c241a;border-left:4px solid #e8c55a;padding:10px 12px;border-radius:6px;margin:10px 0;font-weight:600}
+.panel{background:#f3e6c8;color:#2a2017;border-radius:12px;padding:12px 14px;margin:12px 0;box-shadow:0 2px 0 #00000055}
+.panel h3{margin:0 0 8px;font-size:16px}
+.panel h3 small{font-weight:400;color:#7a6446}
+.centro{text-align:center}
+.lobby{max-width:420px;margin:40px auto}
+.lobby h1{margin:4px 0;color:#8a5a00}
+.lobby label{display:block;text-align:left;font-size:13px;margin:12px 0 4px}
+.lobby input{width:100%;padding:10px;border-radius:8px;border:1px solid #bba57a;font-size:16px;background:#fffdf7}
+.lobby button{width:100%;margin-top:8px;padding:12px}
+.lobby .o{margin:14px 0 0;color:#7a6446;font-size:13px}
+.err{color:#a11;min-height:1.2em}
+.big{font-size:32px;letter-spacing:.15em}
+code{word-break:break-all}
+.oggetti{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.ogg{background:#f3e6c8;color:#2a2017;border-radius:12px;padding:10px 12px;text-align:center}
+.ogg.nx{background:#d9c9a5}
+.ogg small{display:block;text-transform:uppercase;font-size:11px;letter-spacing:.06em;color:#7a6446}
+.oi{font-size:34px;line-height:1.2}
+.on{font-weight:700}
+.ov{font-size:28px;font-weight:800;color:#8a5a00}
+.nc{font-size:12px;color:#6b5536}
+.tavolo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.lato{background:#2c241a;border-radius:12px;padding:10px;text-align:center}
+.nm{font-size:13px;color:#b9a580;margin-bottom:6px}
+.gioc{display:flex;gap:6px;justify-content:center;min-height:84px}
+.carta{width:58px;height:84px;border-radius:8px;background:#fffdf7;color:var(--c,#222);border:1px solid #bba57a;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;flex:none;box-shadow:0 2px 4px #0006;transition:transform .12s}
+.carta b{position:absolute;top:4px;left:6px;font-size:16px}
+.carta i{font-style:normal;font-size:28px}
+.carta small{font-size:8px;position:absolute;bottom:4px;color:#7a6446}
+.carta.retro{background:repeating-linear-gradient(45deg,#5a1f1f,#5a1f1f 6px,#6e2a2a 6px,#6e2a2a 12px);color:#e8c55a;border-color:#3a1010}
+.carta.seme b{color:#aaa}
+.carta.mini{width:44px;height:64px}
+.carta.mini i{font-size:20px}
+.carta.mini b{font-size:13px}
+.carta.mini small{display:none}
+.carta.sel{outline:3px solid #e8c55a;transform:translateY(-8px)}
+.slot{width:58px;height:84px;border:2px dashed #6b5536;border-radius:8px;flex:none}
+.mano{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:16px 0 6px}
+.cw{cursor:pointer}
+.azioni{text-align:center}
+.prev{margin:6px 0;color:#e8c55a;font-weight:600;min-height:1.3em}
+.armi{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.g button.tog{background:#3a2f22;color:#f3e6c8;border:1px solid #6b5536}
+.g button.tog.on{background:#8a5a00;border-color:#e8c55a}
+.g button.play{margin-top:8px;padding:12px 18px;font-size:16px}
+.esito{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center}
+.esito .p{font-size:22px;font-weight:800}
+.esito .tg{font-size:12px;color:#6b5536;min-height:1.2em}
+.esito .w{background:#e2d08f;border-radius:8px}
+.esito .gioc{min-height:auto}
+.verdetto{text-align:center;font-weight:700;margin-top:6px}
+.lotti{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lotto{background:#e8d7b0;border-radius:10px;padding:8px;text-align:center;border:2px solid transparent}
+.lotto.on{border-color:#8a5a00}
+.lt{font-size:12px;margin-bottom:6px}
+.lc{display:flex;gap:4px;justify-content:center;min-height:66px;margin-bottom:6px}
+.paga{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.nota{font-size:12px;color:#6b5536;margin:8px 0 0}
+.stive{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stive .panel{margin:0}
+.stiva{list-style:none;padding:0;margin:0}
+.stiva li{padding:5px 0;border-bottom:1px dashed #c9b48a;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.stiva li .v{margin-left:auto;font-weight:700}
+.stiva li.via{opacity:.4;text-decoration:line-through}
+.stiva li.tieni{cursor:pointer}
+.stiva li.tieni.on{background:#e2d08f}
+.g button.sm{padding:3px 8px;font-size:12px}
+.vuoto{color:#8a7558;font-style:italic;margin:0}
+.log{font-size:13px;color:#b9a580;margin-top:14px}
+.log div{padding:4px 0;border-bottom:1px solid #2c241a}
+.regole{font-size:14px;line-height:1.45}
+.regole ul{padding-left:18px;margin:6px 0}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#a11;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;z-index:9;max-width:90vw}
+@media (max-width:640px){
+  .stive,.lotti{grid-template-columns:1fr}
+  .carta,.slot{width:50px;height:72px}
+  .gioc{min-height:72px}
+}
+/* ===== vista foglio ===== */
+body.vx{background:#fff;color:#000;font-family:Calibri,"Segoe UI",Arial,sans-serif;font-size:13px}
+.xw{display:flex;flex-direction:column;height:100vh}
+.xt{background:#217346;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:6px 12px;font-size:12px}
+.xt b{font-weight:400;font-size:13px}
+.xm{background:#217346;color:#fff;display:flex;gap:18px;padding:2px 12px 0;font-size:13px}
+.xm span{padding:4px 2px}
+.xm span.on{background:#f3f3f3;color:#217346;padding:4px 10px;border-radius:3px 3px 0 0}
+.xr{background:#f3f3f3;border-bottom:1px solid #d4d4d4;display:flex;padding:6px 8px;overflow:hidden;height:84px}
+.xg{border-right:1px solid #d4d4d4;padding:0 12px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;font-size:11px;color:#555;flex:none}
+.xg .ic{display:flex;gap:8px;align-items:center;font-size:12px;color:#222;margin-top:4px}
+.xg .bx{border:1px solid #c8c8c8;background:#fff;padding:1px 6px}
+.xf{display:flex;border-bottom:1px solid #d4d4d4;height:26px;align-items:center}
+.nb{width:90px;border-right:1px solid #d4d4d4;padding:0 6px;height:100%;display:flex;align-items:center}
+.fxl{width:40px;text-align:center;color:#777;font-style:italic;border-right:1px solid #d4d4d4}
+.fxv{padding:0 8px;flex:1;white-space:nowrap;overflow:hidden}
+.xgrid{flex:1;overflow:auto}
+table.xl{border-collapse:collapse;table-layout:fixed}
+table.xl th{background:#f3f3f3;color:#555;font-weight:400;border:1px solid #d4d4d4;font-size:12px;height:21px}
+table.xl td{border:1px solid #e1e1e1;height:21px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.num{text-align:right}
+td.h1{font-weight:700;font-size:15px}
+td.sez{background:#ddebf7;font-weight:700;color:#1f4e78}
+td.lab{color:#595959}
+td.b{font-weight:700}
+td.btn{background:#e2efda;color:#375623;font-weight:700;cursor:pointer;text-align:center}
+td.btn2{background:#fff2cc;cursor:pointer;text-align:center}
+td.cx{text-align:center;font-family:Consolas,monospace;cursor:pointer}
+td.sel{outline:2px solid #217346;outline-offset:-2px;background:#e2efda}
+td.sel-cella{outline:2px solid #217346;outline-offset:-2px}
+td.rosso{color:#c00000}
+td.dim{color:#aaa}
+td.verde{color:#375623;font-weight:700}
+td input{width:100%;border:0;font:inherit;background:#fffbe6;height:19px;outline:none}
+.xs{background:#f3f3f3;border-top:1px solid #d4d4d4;display:flex;gap:2px;padding:0 8px;font-size:12px}
+.xs span{padding:4px 14px;cursor:pointer}
+.xs span.on{background:#fff;color:#217346;font-weight:700;border-bottom:2px solid #217346}
+.xst{background:#217346;color:#fff;font-size:11px;display:flex;justify-content:space-between;padding:3px 12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ================== CONFIG ================== */
+const SB_URL = 'https://fxnfaotahrlmmrundkib.supabase.co';
+const SB_KEY = 'sb_publishable_P-5jMCC2t_GpKLhwvlosiQ_tIUmUPpW';
+const TAB = 'bottino';
+const N_OGGETTI = 15, TIENI = 5, MANO_MAX = 7, MANO_INIZ = 5, PESCA = 3, BONUS_ARMA = 8;
+
+/* ================== DATI ================== */
+const SEMI = {
+  S:{n:'Sciabole', ic:'⚔', x:'SC', col:'#a32020'},
+  D:{n:'Dobloni',  ic:'◉', x:'DB', col:'#a8790a'},
+  T:{n:'Teschi',   ic:'☠', x:'TS', col:'#222'},
+  N:{n:'Ancore',   ic:'⚓', x:'AN', col:'#1f4466'}
+};
+const RANK = r => r===1?'A':r===11?'J':r===12?'Q':r===13?'K':String(r);
+const CAT = {
+  oro:     {n:'Oro',        ic:'🪙', x:'Comm. metalli', nota:'Vale tra 30 e 50, raramente di più'},
+  gioielli:{n:'Gioielli',   ic:'💎', x:'Preziosi',      nota:'Da 10 a 90: può essere un affare o una patacca'},
+  armi:    {n:'Armi',       ic:'🗡️', x:'Derivati',      nota:'Usala una volta: +8 alla combinazione, ma il suo valore si dimezza'},
+  cibo:    {n:'Cibo',       ic:'🍖', x:'Liq. breve',    nota:'Vale poco, ma mangiandolo peschi una carta'},
+  rum:     {n:'Rum',        ic:'🥃', x:'Liquidi',       nota:'Il Ricettatore lo valuta il doppio'},
+  mappa:   {n:'Mappa',      ic:'🗺️', x:'Private eq.',   nota:'Valore segreto (0-100), si scopre a fine partita'},
+  idolo:   {n:'Maledizione',ic:'🗿', x:'Sofferenza',    nota:'Vale -20 e non si può buttare'}
+};
+const NAVI = {
+  spagnola:{n:'galeone spagnolo Santa Catalina', moneta:'dobloni',     p:{oro:4,gioielli:2,armi:2,cibo:3,rum:2,mappa:1,idolo:1}},
+  inglese: {n:'mercantile inglese Royal Merchant', moneta:'ghinee',    p:{oro:2,gioielli:2,armi:4,cibo:3,rum:2,mappa:1,idolo:1}},
+  olandese:{n:'fluyt olandese Gouden Leeuw', moneta:'fiorini',         p:{oro:2,gioielli:4,armi:2,cibo:3,rum:2,mappa:1,idolo:1}},
+  francese:{n:'brigantino francese Belle Étoile', moneta:"luigi d'oro",p:{oro:2,gioielli:3,armi:2,cibo:2,rum:4,mappa:1,idolo:1}}
+};
+const NOMI = {
+  oro: m => ['Sacco di '+m,'Forziere di '+m,"Lingotti d'oro","Calice d'oro","Catena d'oro",'Scrigno di '+m,"Candelabro d'oro"],
+  gioielli: () => ['Collana di perle','Anello con rubino','Smeraldi grezzi','Diadema','Spilla di zaffiri','Orecchini di diamante','Croce tempestata','Cofanetto di ametiste'],
+  armi: () => ['Pistola a pietra focaia','Sciabola da abbordaggio','Moschetto','Pugnale cerimoniale','Cannoncino girevole',"Ascia d'arrembaggio",'Coppia di pistole'],
+  cibo: () => ['Barile di gallette','Prosciutto salato','Cassa di limoni','Forma di formaggio','Sacco di fagioli','Carne secca','Gabbia di galline'],
+  rum: () => ['Botte di rum','Bottiglie di rum scuro','Fiasco di grog','Damigiana di rum'],
+  mappa: () => ['Mappa del tesoro','Carta nautica segreta'],
+  idolo: () => ['Idolo maledetto']
+};
+const LOTTI = {
+  piccolo:{n:1, vis:['seme'],               min:0,  x:'Pacchetto S'},
+  medio:  {n:2, vis:['tutto','seme'],       min:20, x:'Pacchetto M'},
+  grosso: {n:3, vis:['tutto','nulla','nulla'], min:40, x:'Pacchetto L'}
+};
+const COMBO = [ // [chiave, nome, sigla foglio, bonus] in ordine di forza
+  ['scalacol','Scala colore','SCC',40], ['tris','Tris','TRS',35], ['scala','Scala','SCL',15],
+  ['arrembaggio','Arrembaggio','ARR',15], ['colore','Colore','COL',12], ['coppia','Coppia','CPP',10]
+];
+const TAGS = {arma:{g:'Arma +'+BONUS_ARMA, x:'GAR'}};
+COMBO.forEach(([k,g,x,b])=>TAGS[k]={g:g+' +'+b, x});
+
+/* ================== LOGICA PURA ================== */
+function rnd(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function nuovoMazzo(){ const m=[]; for(const s of 'SDTN') for(let r=1;r<=13;r++) m.push({s,r}); return m; }
+function pesca(s){
+  if(!s.mazzo.length){ s.mazzo = shuffle(s.scarti); s.scarti = []; }
+  return s.mazzo.pop() || null;
+}
+function valCarta(c){ return c.r===1 ? 11 : c.r>=11 ? 10 : c.r; }
+function eScala(rs){
+  const a=[...rs].sort((x,y)=>x-y);
+  if(a[1]===a[0]+1 && a[2]===a[1]+1) return true;
+  const b=rs.map(r=>r===1?14:r).sort((x,y)=>x-y); // Asso alto: Q-K-A
+  return b[1]===b[0]+1 && b[2]===b[1]+1;
+}
+function punti(carte,arma){
+  const rs=carte.map(c=>c.r), ss=carte.map(c=>c.s);
+  const somma=carte.reduce((a,c)=>a+valCarta(c),0);
+  const col = carte.length===3 && ss.every(x=>x===ss[0]);
+  const sc = carte.length===3 && eScala(rs);
+  const cnt={}; rs.forEach(r=>cnt[r]=(cnt[r]||0)+1); const m=Math.max(...Object.values(cnt));
+  const fig=rs.filter(r=>r>=11).length;
+  let k=null;
+  if(sc && col) k='scalacol';
+  else if(m===3) k='tris';
+  else if(sc) k='scala';
+  else if(rs.includes(1) && fig===2) k='arrembaggio';
+  else if(col) k='colore';
+  else if(m===2) k='coppia';
+  const tags=[]; let p=somma;
+  if(k){ p+=COMBO.find(c=>c[0]===k)[3]; tags.push(k); }
+  if(arma){ p+=BONUS_ARMA; tags.push('arma'); }
+  return {p, tags};
+}
+function valoreFinale(o){ return (o.cat==='armi' && o.usata) ? Math.floor(o.valore/2) : o.valore; }
+function pagamento(o){
+  if(o.cat==='idolo') return null;
+  if(o.cat==='mappa') return 30;
+  if(o.cat==='rum') return o.valore*2;
+  return valoreFinale(o);
+}
+function pesoRandom(p){
+  const tot=Object.values(p).reduce((a,b)=>a+b,0); let x=Math.random()*tot;
+  for(const k in p){ x-=p[k]; if(x<0) return k; }
+  return 'cibo';
+}
+function creaOggetto(cat,nave,i){
+  let v;
+  switch(cat){
+    case 'oro': v = Math.random()<0.15 ? rnd(51,65) : rnd(30,50); break;
+    case 'gioielli': v = rnd(10,90); break;
+    case 'armi': v = rnd(20,40); break;
+    case 'cibo': v = rnd(0,10); break;
+    case 'rum': v = rnd(5,15); break;
+    case 'mappa': v = rnd(0,100); break;
+    default: v = -20;
+  }
+  return {id:'LT'+(101+i), cat, nome:pick(NOMI[cat](NAVI[nave].moneta)), valore:v};
+}
+function generaCoda(nave){
+  const out=[]; let idoli=0, mappe=0;
+  while(out.length<N_OGGETTI){
+    const c = pesoRandom(NAVI[nave].p);
+    if(c==='idolo' && idoli>=1) continue;
+    if(c==='mappa' && mappe>=2) continue;
+    if(c==='idolo') idoli++;
+    if(c==='mappa') mappe++;
+    out.push(creaOggetto(c,nave,out.length));
+  }
+  return out;
+}
+function nuovoLotto(s,tipo){
+  const carte=[]; for(let i=0;i<LOTTI[tipo].n;i++){ const c=pesca(s); if(c) carte.push(c); }
+  return {tipo, carte};
+}
+function vuota(){ return {c1:null, c2:null, arma:null, comprato:false}; }
+function addLog(s,g,x){ s.log.unshift({g,x,t:Date.now()}); s.log = s.log.slice(0,40); }
+function nome(s,p){ return (s.giocatori[p] && s.giocatori[p].nome) || (p==='A'?'Pirata A':'Pirata B'); }
+function altro(p){ return p==='A'?'B':'A'; }
+
+function nuovoStato(giocatori){
+  const nave = pick(Object.keys(NAVI));
+  const s = {
+    fase: giocatori.B ? 'gioco' : 'attesa', nave, coda:generaCoda(nave), turno:0,
+    mazzo:shuffle(nuovoMazzo()), scarti:[], mani:{A:[],B:[]}, stive:{A:[],B:[]},
+    mare:[], venduti:[], banco:[], giocate:{A:vuota(),B:vuota()}, fase_turno:'prima',
+    esito:null, log:[], scelte:{A:null,B:null}, giocatori, risultato:null
+  };
+  for(let i=0;i<MANO_INIZ;i++){ s.mani.A.push(pesca(s)); s.mani.B.push(pesca(s)); }
+  s.banco = ['piccolo','medio','grosso'].map(t=>nuovoLotto(s,t));
+  addLog(s, `Abbordato il ${NAVI[nave].n}: ${N_OGGETTI} oggetti da spartire.`,
+            `Avvio sessione: ${N_OGGETTI} lotti caricati, controparte ${nave.toUpperCase()}.`);
+  return s;
+}
+
+// azioni (ritornano false se non valide)
+function regolaCompra(s,p,li,itemId){
+  const g=s.giocate[p];
+  if(s.fase!=='gioco' || g.comprato || g.c2) return false;
+  const lot=s.banco[li]; if(!lot) return false;
+  const st=s.stive[p]; const k=st.findIndex(o=>o.id===itemId); if(k<0) return false;
+  if(st[k].cat==='armi' && g.arma===st[k].id) return false;
+  const pv=pagamento(st[k]); if(pv===null || pv<LOTTI[lot.tipo].min) return false;
+  const [it]=st.splice(k,1); s.venduti.push(it);
+  s.mani[p].push(...lot.carte);
+  s.banco[li]=nuovoLotto(s,lot.tipo); g.comprato=true;
+  addLog(s, `${nome(s,p)} compra un lotto ${lot.tipo} dal Ricettatore e paga con: ${it.nome}.`,
+            `${nome(s,p)}: acquisto ${LOTTI[lot.tipo].x} su desk OTC, regolato con ${it.id} (${CAT[it.cat].x}).`);
+  return true;
+}
+function regolaMangia(s,p,itemId){
+  if(s.fase!=='gioco' || s.giocate[p].c2) return false;
+  if(s.mani[p].length>=MANO_MAX) return false;
+  const st=s.stive[p]; const k=st.findIndex(o=>o.id===itemId && o.cat==='cibo'); if(k<0) return false;
+  const [it]=st.splice(k,1); (s.mangiati=s.mangiati||[]).push(it);
+  const c=pesca(s); if(c) s.mani[p].push(c);
+  addLog(s, `La ciurma di ${nome(s,p)} si mangia: ${it.nome}. +1 carta.`,
+            `${nome(s,p)}: liquidazione ${it.id}, +1 ordine disponibile.`);
+  return true;
+}
+function regolaGioca(s,p,idxs,armaId){
+  if(s.fase!=='gioco') return false;
+  const g=s.giocate[p], mano=s.mani[p];
+  idxs=[...new Set(idxs||[])];
+  if(idxs.some(i=>i<0||i>=mano.length)) return false;
+  const togli=()=>[...idxs].sort((a,b)=>b-a).map(i=>mano.splice(i,1)[0]).reverse();
+  if(s.fase_turno==='prima'){
+    if(g.c1 || idxs.length!==2) return false;
+    g.c1 = togli();                       // le due carte scoperte
+    if(s.giocate[altro(p)].c1) s.fase_turno='seconda';
+  } else {
+    if(g.c2 || !g.c1 || idxs.length!==1) return false;
+    if(armaId){
+      const a=s.stive[p].find(o=>o.id===armaId && o.cat==='armi' && !o.usata);
+      if(!a) return false; g.arma=a.id;
+    }
+    g.c2 = togli()[0];                    // la carta coperta
+    if(s.giocate[altro(p)].c2) risolvi(s);
+  }
+  return true;
+}
+function risolvi(s){
+  const it=s.coda[s.turno], r={};
+  for(const p of ['A','B']){
+    const g=s.giocate[p];
+    const a = g.arma ? s.stive[p].find(o=>o.id===g.arma) : null;
+    if(a) a.usata=true;
+    const carte=[...g.c1, g.c2], pt=punti(carte,!!a);
+    r[p]={carte, arma:a?a.nome:null, p:pt.p, tags:pt.tags};
+    s.scarti.push(...carte);
+  }
+  const w = r.A.p>r.B.p ? 'A' : r.B.p>r.A.p ? 'B' : null;
+  if(w) s.stive[w].push(it); else s.mare.push(it);
+  s.esito={turno:s.turno, item:it, A:r.A, B:r.B, w};
+  const vt = it.cat==='mappa' ? '?' : it.valore;
+  addLog(s,
+    w ? `Oggetto ${s.turno+1}: ${it.nome} (${vt}) va a ${nome(s,w)}, ${r[w].p} contro ${r[altro(w)].p}.`
+      : `Oggetto ${s.turno+1}: pareggio a ${r.A.p}, ${it.nome} finisce in mare.`,
+    w ? `Asta ${s.turno+1} ${it.id}: rating ${r.A.p}/${r.B.p}, aggiudicato a ${nome(s,w)}.`
+      : `Asta ${s.turno+1} ${it.id}: rating ${r.A.p}/${r.B.p}, nessuna aggiudicazione (stralcio).`);
+  for(const p of ['A','B']){
+    let n=0;
+    while(n<PESCA && s.mani[p].length<MANO_MAX){ const c=pesca(s); if(!c) break; s.mani[p].push(c); n++; }
+    while(s.mani[p].length>MANO_MAX){
+      let k=0; s.mani[p].forEach((c,i)=>{ if(valCarta(c)<valCarta(s.mani[p][k])) k=i; });
+      s.scarti.push(s.mani[p].splice(k,1)[0]);
+    }
+  }
+  s.giocate={A:vuota(),B:vuota()}; s.fase_turno='prima'; s.turno++;
+  if(s.turno>=N_OGGETTI){
+    s.fase='scelta';
+    addLog(s,'Bottino finito! Ognuno sceglie i 5 oggetti da tenere.','Chiusura sessione: selezione posizioni da mantenere.');
+  }
+}
+function regolaScegli(s,p,keep){
+  if(s.fase!=='scelta' || s.scelte[p]) return false;
+  const st=s.stive[p], need=Math.min(TIENI,st.length);
+  if(keep.length!==need || new Set(keep).size!==keep.length) return false;
+  for(const id of keep) if(!st.find(o=>o.id===id)) return false;
+  for(const o of st) if(o.cat==='idolo' && !keep.includes(o.id)) return false;
+  s.scelte[p]=keep;
+  if(s.scelte[altro(p)]) chiudi(s);
+  return true;
+}
+function totaleTenuto(s,p){
+  return s.stive[p].filter(o=>s.scelte[p].includes(o.id)).reduce((a,o)=>a+valoreFinale(o),0);
+}
+function chiudi(s){
+  const A=totaleTenuto(s,'A'), B=totaleTenuto(s,'B');
+  const w = A>B?'A':B>A?'B':null;
+  s.risultato={A,B,w}; s.fase='fine';
+  addLog(s, w ? `${nome(s,w)} vince la spartizione, ${Math.max(A,B)} a ${Math.min(A,B)}.` : `Pareggio a ${A}: rissa sul ponte.`,
+            `Sessione chiusa. Controvalore finale ${A} / ${B}.`);
+}
+
+/* ================== CLIENT ================== */
+if(typeof document!=='undefined'){
+
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const MOBILE = matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+let codice=null, ruolo=null, S=null, ver=-1, canale=null, poll=null, occupato=false;
+let vista = ls('bottino:vista') || (MOBILE ? 'gioco' : 'foglio');
+let boss=false, chiaveUi='';
+const ui = {sel:[], arma:null, acquisto:null, tieni:null, regole:false, msg:'', codPre:'', ref:'A1', fx:''};
+
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+function esc(t){ return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function lui(){ return altro(ruolo); }
+function toast(t){ ui.msg=t; render(); clearTimeout(toast.t); toast.t=setTimeout(()=>{ ui.msg=''; render(); },3500); }
+function errore(e){ console.error(e); toast('Errore: '+(e.message||e)); }
+function genCodice(){ const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c=''; for(let i=0;i<4;i++) c+=a[Math.floor(Math.random()*a.length)]; return c; }
+function leggiNome(){
+  const el=document.getElementById('nomeIn'); const v=(el?el.value:'').trim().slice(0,20);
+  if(!v){ toast('Scrivi prima il tuo nome'); return null; }
+  ls('bottino:nome',v); return v;
+}
+
+async function crea(){
+  const n=leggiNome(); if(!n) return;
+  for(let k=0;k<5;k++){
+    const c=genCodice();
+    const {error}=await sb.from(TAB).insert({codice:c, stato:nuovoStato({A:{nome:n},B:null}), versione:0});
+    if(!error){ ls('bottino:'+c,'A'); return apri(c); }
+    if(!/duplicate/i.test(error.message)) return errore(error);
+  }
+}
+async function entra(c){
+  c=(c||'').trim().toUpperCase();
+  if(c.length!==4) return toast('Il codice ha 4 caratteri');
+  const {data,error}=await sb.from(TAB).select('stato,versione').eq('codice',c).maybeSingle();
+  if(error) return errore(error);
+  if(!data) return toast('Stanza non trovata');
+  if(!ls('bottino:'+c)){
+    const g=data.stato.giocatori;
+    const n=leggiNome(); if(!n) return;
+    const stesso = p => g[p] && g[p].nome.toLowerCase()===n.toLowerCase();
+    if(stesso('A')||stesso('B')){
+      // rientro: stesso nome di un giocatore già presente
+      ls('bottino:'+c, stesso('A')?'A':'B');
+      return apri(c);
+    }
+    if(g.B) return toast('Stanza già piena');
+    codice=c; ruolo='B';
+    const ok=await muta(s=>{
+      if(s.giocatori.B) return false;
+      s.giocatori.B={nome:n}; s.fase='gioco';
+      addLog(s,`${n} sale a bordo. Si comincia!`,`Controparte ${n} collegata. Sessione avviata.`);
+    });
+    if(!ok){ codice=null; ruolo=null; S=null; ver=-1; render(); return toast('Stanza già piena'); }
+    ls('bottino:'+c,'B');
+  }
+  apri(c);
+}
+async function apri(c){
+  codice=c; ruolo=ls('bottino:'+c);
+  try{ history.replaceState(null,'','?c='+c); }catch(e){}
+  const {data,error}=await sb.from(TAB).select('stato,versione').eq('codice',c).maybeSingle();
+  if(error) return errore(error);
+  if(!data){ codice=null; return toast('Stanza non trovata'); }
+  applica(data,true);
+  if(canale) sb.removeChannel(canale);
+  canale=sb.channel('bottino-'+c)
+    .on('postgres_changes',{event:'*',schema:'public',table:TAB,filter:'codice=eq.'+c},
+        p=>{ if(p.new && p.new.stato) applica(p.new); })
+    .subscribe();
+  clearInterval(poll);
+  poll=setInterval(async()=>{
+    if(!codice) return;
+    const {data}=await sb.from(TAB).select('stato,versione').eq('codice',codice).maybeSingle();
+    if(data) applica(data);
+  },4000);
+}
+function esci(){
+  codice=null; ruolo=null; S=null; ver=-1; clearInterval(poll);
+  if(canale){ sb.removeChannel(canale); canale=null; }
+  try{ history.replaceState(null,'',location.pathname); }catch(e){}
+  render();
+}
+function applica(row,forza){
+  if(!forza && row.versione<=ver) return;
+  ver=row.versione; S=row.stato; render();
+}
+async function muta(fn){
+  for(let t=0;t<4;t++){
+    const {data:cur,error:e1}=await sb.from(TAB).select('stato,versione').eq('codice',codice).single();
+    if(e1){ errore(e1); return false; }
+    const s=JSON.parse(JSON.stringify(cur.stato));
+    if(fn(s)===false){ applica(cur); return false; }
+    const {data,error}=await sb.from(TAB)
+      .update({stato:s, versione:cur.versione+1, aggiornato_il:new Date().toISOString()})
+      .eq('codice',codice).eq('versione',cur.versione).select('stato,versione');
+    if(error){ errore(error); return false; }
+    if(data && data.length){ applica(data[0]); return true; }
+  }
+  toast('Mossa sovrapposta, riprova'); return false;
+}
+async function azione(fn,msgKo){
+  if(occupato) return; occupato=true;
+  try{ const ok=await muta(fn); if(!ok && msgKo) toast(msgKo); return ok; }
+  finally{ occupato=false; }
+}
+
+/* ---------- helper di vista ---------- */
+function valTxt(o,rivela){ return (o.cat==='mappa' && !rivela) ? '?' : valoreFinale(o); }
+function totVis(p){ return S.stive[p].reduce((a,o)=>a+(o.cat==='mappa'?0:valoreFinale(o)),0); }
+function nMappe(p){ return S.stive[p].filter(o=>o.cat==='mappa').length; }
+function stima(o){ return o.cat==='mappa'?50:valoreFinale(o); }
+function tieniDefault(){
+  const st=S.stive[ruolo];
+  const sel=st.filter(o=>o.cat==='idolo').map(o=>o.id);
+  [...st].sort((a,b)=>stima(b)-stima(a)).forEach(o=>{ if(sel.length<Math.min(TIENI,st.length) && !sel.includes(o.id)) sel.push(o.id); });
+  return sel;
+}
+function aggiornaUi(){
+  const k=S.fase+'|'+S.turno+'|'+S.fase_turno;
+  if(k!==chiaveUi){ chiaveUi=k; ui.sel=[]; ui.arma=null; ui.acquisto=null; if(S.fase!=='scelta') ui.tieni=null; }
+  if(S.fase==='scelta' && !ui.tieni) ui.tieni=tieniDefault();
+  ui.sel=(ui.sel||[]).filter(i=>i<S.mani[ruolo].length);
+}
+function puoGiocare(){
+  if(S.fase!=='gioco') return false;
+  const g=S.giocate[ruolo];
+  return S.fase_turno==='prima' ? !g.c1 : !g.c2;
+}
+function anteprima(){
+  const g=S.giocate[ruolo];
+  if(S.fase!=='gioco' || g.c2) return null;
+  const mano=S.mani[ruolo];
+  if(S.fase_turno==='seconda' && g.c1 && ui.sel.length===1) return punti([...g.c1, mano[ui.sel[0]]], !!ui.arma);
+  if(S.fase_turno==='prima' && !g.c1 && ui.sel.length===2) return punti(ui.sel.map(i=>mano[i]), false);
+  return null;
+}
+function armiLibere(){ return S.stive[ruolo].filter(o=>o.cat==='armi' && !o.usata); }
+function eleggibili(){
+  if(ui.acquisto==null) return [];
+  const min=LOTTI[S.banco[ui.acquisto].tipo].min;
+  return S.stive[ruolo].filter(o=>{ const p=pagamento(o); return p!==null && p>=min; });
+}
+function statoG(){
+  const s=S, g=s.giocate[ruolo], on=nome(s,lui());
+  if(s.fase==='gioco'){
+    if(s.fase_turno==='prima') return !g.c1 ? `Scegli 2 carte: si scoprono insieme a quelle di ${on}.` : `Aspetti le 2 carte di ${on}…`;
+    return !g.c2 ? 'Hai visto le sue 2 carte. Scegli la terza: resta coperta fino alla fine.' : `Aspetti la terza carta di ${on}…`;
+  }
+  if(s.fase==='scelta') return !s.scelte[ruolo] ? `Bottino finito: scegli i ${TIENI} oggetti da tenere. Le mappe si scoprono dopo.` : `Aspetti che ${on} scelga i suoi oggetti…`;
+  if(s.fase==='fine'){ const r=s.risultato; return r.w ? (r.w===ruolo?'Hai vinto la spartizione! ':'Hai perso. ')+`${r[ruolo]} a ${r[lui()]}` : `Pareggio a ${r.A}`; }
+  return '';
+}
+function statoX(){
+  const s=S, g=s.giocate[ruolo];
+  if(s.fase==='attesa') return `In attesa controparte. Comunicare codice pratica ${codice}`;
+  if(s.fase==='gioco'){
+    if(s.fase_turno==='prima') return !g.c1 ? 'Selezionare 2 ordini ed eseguire (esecuzione contestuale alla controparte)' : 'In attesa ordini 1-2 controparte';
+    return !g.c2 ? 'Ordini 1-2 controparte ricevuti. Selezionare Ordine 3 (riservato)' : 'In attesa Ordine 3 controparte';
+  }
+  if(s.fase==='scelta') return !s.scelte[ruolo] ? `Chiusura: selezionare ${TIENI} posizioni da mantenere (1 = mantieni) e confermare` : 'In attesa chiusura controparte';
+  const r=s.risultato; return `Sessione chiusa. Controvalore ${r[ruolo]} vs ${r[lui()]}. Esito: ${r.w?(r.w===ruolo?'POSITIVO':'NEGATIVO'):'NEUTRO'}`;
+}
+function regoleHTML(){
+  return `<div class="panel regole"><h3>Come si gioca</h3><ul>
+<li>Ci sono ${N_OGGETTI} oggetti da spartire, uno per turno. Dell'oggetto in palio vedi il valore, del prossimo solo la categoria.</li>
+<li>Hai ${MANO_INIZ} carte. Ogni turno ne giochi 3: due si scoprono insieme a quelle dell'avversario, la terza resta coperta. A fine turno peschi ${PESCA} carte (massimo ${MANO_MAX} in mano).</li>
+<li>Punteggio: somma delle 3 carte (figure 10, Asso 11) più il bonus della combinazione migliore: ${COMBO.map(c=>c[1]+' +'+c[3]).join(', ')}. Scala: 3 consecutive (A-2-3 e Q-K-A valgono). Arrembaggio: Asso + 2 figure.</li>
+<li>Chi fa di più prende l'oggetto. In caso di pareggio l'oggetto finisce in mare.</li>
+<li>Il Ricettatore vende lotti di carte, solo in parte visibili. Si paga con un oggetto della stiva, al massimo una volta per turno: piccolo (qualsiasi oggetto), medio (oggetto da almeno 20), grosso (da almeno 40). Il rum per lui vale il doppio, le mappe 30, l'idolo non lo vuole.</li>
+<li>Cibo: mangialo per pescare una carta. Armi: usale una volta per fare +${BONUS_ARMA}, ma il loro valore si dimezza.</li>
+<li>Alla fine ognuno tiene ${TIENI} oggetti e butta il resto. L'idolo maledetto (-20) non si può buttare. Vince chi ha il bottino più ricco.</li></ul></div>`;
+}
+
+/* ---------- carte grafiche ---------- */
+function carta(c,mode='tutto',extra=''){
+  if(mode==='nulla' || !c) return `<div class="carta retro ${extra}"><i>☠</i></div>`;
+  const se=SEMI[c.s];
+  if(mode==='seme') return `<div class="carta seme ${extra}" style="--c:${se.col}"><b>?</b><i>${se.ic}</i><small>${se.n}</small></div>`;
+  return `<div class="carta ${extra}" style="--c:${se.col}"><b>${RANK(c.r)}</b><i>${se.ic}</i><small>${se.n}</small></div>`;
+}
+const SLOT='<div class="slot"></div>';
+function oggLi(o,p,rivela,extra=''){
+  let btn='';
+  if(p===ruolo && S.fase==='gioco' && !S.giocate[ruolo].c2 && o.cat==='cibo' && S.mani[ruolo].length<MANO_MAX)
+    btn=`<button class="sm" data-a="mangia:${o.id}">Mangia (+1 carta)</button>`;
+  return `<li class="${extra}" ${extra.includes('tieni')?`data-a="tieni:${o.id}"`:''} title="${esc(CAT[o.cat].nota)}">${CAT[o.cat].ic} ${esc(o.nome)}${o.usata?' <em>(usata)</em>':''} ${btn}<span class="v">${valTxt(o,rivela)}</span></li>`;
+}
+
+/* ---------- vista gioco ---------- */
+function lobbyG(){
+  return `<div class="g"><div class="panel centro lobby"><h1>🏴‍☠️ Bottino</h1>
+<p>Due pirati, un bottino da spartire. ${N_OGGETTI} oggetti, se ne tengono ${TIENI}.</p>
+<label>Il tuo nome da pirata<input id="nomeIn" maxlength="20" value="${esc(ls('bottino:nome')||'')}"></label>
+<button data-a="crea">Crea partita</button>
+<div class="o">oppure entra con un codice</div>
+<label>Codice stanza<input id="codIn" maxlength="4" value="${esc(ui.codPre)}" style="text-transform:uppercase"></label>
+<button data-a="entra">Entra</button>
+<p><button class="tog" data-a="vista:foglio">Vista foglio</button></p></div></div>`;
+}
+function renderGioco(){
+  const s=S, me=ruolo, op=lui();
+  let h=`<div class="g"><header class="gh"><div><b>🏴‍☠️ Bottino</b><span class="pill">Stanza ${codice}</span></div>
+<div class="hb"><button data-a="regole">Regole</button><button data-a="vista:foglio">Vista foglio</button><button data-a="esci">Esci</button></div></header>`;
+  if(ui.regole) h+=regoleHTML();
+  h+=`<div class="nave">Abbordato il ${esc(NAVI[s.nave].n)}</div>`;
+  if(s.fase==='attesa'){
+    return h+`<div class="panel centro"><h3>Aspetta il tuo socio</h3><p>Dagli il codice</p><p class="big"><b>${codice}</b></p>
+<p>oppure il link:<br><code>${esc(location.origin+location.pathname)}?c=${codice}</code></p></div></div>`;
+  }
+  h+=`<div class="stato">${esc(statoG())}</div>`;
+  if(s.fase==='gioco') h+=tavoloG();
+  if(s.fase==='scelta') h+=sceltaG();
+  if(s.fase==='fine') h+=fineG();
+  if(s.esito && s.fase!=='fine') h+=esitoG();
+  if(s.fase==='gioco') h+=mercatoG();
+  if(s.fase==='gioco') h+=`<div class="stive">${stivaG(me)}${stivaG(op)}</div>`;
+  h+=`<div class="log">${s.log.slice(0,12).map(l=>`<div>${esc(l.g)}</div>`).join('')}</div>`;
+  return h+'</div>';
+}
+function tavoloG(){
+  const s=S, me=ruolo, op=lui(), it=s.coda[s.turno], nx=s.coda[s.turno+1];
+  const gO=s.giocate[op], gM=s.giocate[me], scop=s.fase_turno==='seconda';
+  let h=`<div class="oggetti"><div class="ogg"><small>In palio · ${s.turno+1} di ${N_OGGETTI}</small>
+<div class="oi">${CAT[it.cat].ic}</div><div class="on">${esc(it.nome)}</div><div class="ov">${valTxt(it,false)}</div><div class="nc">${esc(CAT[it.cat].nota)}</div></div>`;
+  h+= nx ? `<div class="ogg nx"><small>Prossimo</small><div class="oi">${CAT[nx.cat].ic}</div><div class="on">${CAT[nx.cat].n}</div><div class="ov">?</div></div>`
+         : `<div class="ogg nx"><small>Prossimo</small><div class="on">È l'ultimo oggetto</div></div>`;
+  h+=`</div><div class="tavolo">
+<div class="lato"><div class="nm">${esc(nome(s,op))} · ${s.mani[op].length} carte in mano${gO.comprato?' · 🦜 ha comprato':''}</div>
+<div class="gioc">${gO.c1?gO.c1.map(c=>scop?carta(c):carta(null,'nulla')).join(''):SLOT+SLOT}${gO.c2?carta(null,'nulla'):SLOT}</div></div>
+<div class="lato"><div class="nm">Tu${gM.arma?' · arma pronta':''}</div><div class="gioc">${gM.c1?gM.c1.map(c=>carta(c)).join(''):SLOT+SLOT}${gM.c2?carta(gM.c2):SLOT}</div></div></div>`;
+  const mano=s.mani[me];
+  h+=`<div class="mano">${mano.map((c,i)=>`<div class="cw" data-a="sel:${i}">${carta(c,'tutto',ui.sel.includes(i)?'sel':'')}</div>`).join('')}</div>`;
+  h+=`<div class="azioni">`;
+  const pr=anteprima();
+  h+=`<div class="prev">${pr?`${s.fase_turno==='prima'?'Le tue due scoperte valgono':'La tua combinazione'}: ${pr.p}${pr.tags.length?' ('+pr.tags.map(t=>TAGS[t].g).join(', ')+')':''}`:''}</div>`;
+  if(s.fase_turno==='seconda' && !gM.c2){
+    const ar=armiLibere();
+    if(ar.length) h+=`<div class="armi">${ar.map(a=>`<button class="tog ${ui.arma===a.id?'on':''}" data-a="arma:${a.id}">🗡️ Usa ${esc(a.nome)} (+${BONUS_ARMA}, vale la metà)</button>`).join('')}</div>`;
+  }
+  if(puoGiocare()){ const serve=s.fase_turno==='prima'?2:1;
+    h+=`<button class="play" data-a="gioca" ${ui.sel.length===serve?'':'disabled'}>${s.fase_turno==='prima'?`Gioca le 2 carte scoperte (${ui.sel.length}/2)`:'Gioca la terza carta (coperta)'}</button>`; }
+  return h+`</div>`;
+}
+function esitoG(){
+  const e=S.esito, me=ruolo, op=lui();
+  const lato=p=>`<div class="${e.w===p?'w':''}"><div class="nm" style="color:#6b5536">${p===me?'Tu':esc(nome(S,p))}</div>
+<div class="gioc">${e[p].carte.map(c=>carta(c,'tutto','mini')).join('')}</div>
+<div class="p">${e[p].p}</div><div class="tg">${e[p].tags.map(t=>TAGS[t].g).join(' · ')}</div></div>`;
+  return `<div class="panel"><h3>Turno precedente: ${CAT[e.item.cat].ic} ${esc(e.item.nome)} (${valTxt(e.item,S.fase==='fine')})</h3>
+<div class="esito">${lato(op)}${lato(me)}</div>
+<div class="verdetto">${e.w?(e.w===me?'Preso da te':'Preso da '+esc(nome(S,op))):'Pareggio: finisce in mare'}</div></div>`;
+}
+function mercatoG(){
+  const g=S.giocate[ruolo], can=!g.comprato && !g.c2;
+  let h=`<div class="panel"><h3>🦜 Il Ricettatore ${g.comprato?'<small>· hai già comprato in questo turno</small>':''}</h3><div class="lotti">`;
+  S.banco.forEach((l,i)=>{
+    const L=LOTTI[l.tipo];
+    h+=`<div class="lotto ${ui.acquisto===i?'on':''}"><div class="lt"><b>${l.tipo[0].toUpperCase()+l.tipo.slice(1)}</b> · paghi con ${L.min?'un oggetto da almeno '+L.min:'un oggetto qualsiasi'}</div>
+<div class="lc">${l.carte.map((c,k)=>carta(c,L.vis[k],'mini')).join('')}</div>
+<button data-a="compra:${i}" ${can?'':'disabled'}>${ui.acquisto===i?'Annulla':'Compra'}</button></div>`;
+  });
+  h+='</div>';
+  if(ui.acquisto!=null){
+    const el=eleggibili();
+    h+= el.length ? `<div class="paga"><b>Paga con:</b>${el.map(o=>`<button class="sm" data-a="paga:${o.id}">${CAT[o.cat].ic} ${esc(o.nome)} · per lui vale ${pagamento(o)}</button>`).join('')}</div>`
+                  : `<div class="paga">Non hai niente che gli interessi per questo lotto.</div>`;
+  }
+  return h+`<p class="nota">Il rum per lui vale il doppio, le mappe 30. L'idolo maledetto non lo tocca.</p></div>`;
+}
+function stivaG(p){
+  const st=S.stive[p], m=nMappe(p);
+  return `<div class="panel"><h3>${p===ruolo?'La tua stiva':'Stiva di '+esc(nome(S,p))} <small>· ${st.length} oggett${st.length===1?'o':'i'} · ${totVis(p)}${m?' + '+m+' mapp'+(m>1?'e':'a'):''}</small></h3>
+${st.length?`<ul class="stiva">${st.map(o=>oggLi(o,p,false)).join('')}</ul>`:'<p class="vuoto">vuota</p>'}</div>`;
+}
+function sceltaG(){
+  const st=S.stive[ruolo], need=Math.min(TIENI,st.length), fatto=!!S.scelte[ruolo];
+  let h=`<div class="panel"><h3>Cosa tieni? <small>· ${fatto?'scelta confermata':ui.tieni.length+' di '+need+' selezionati'}</small></h3>`;
+  if(!st.length) h+='<p class="vuoto">La tua stiva è vuota.</p>';
+  else h+=`<ul class="stiva">${st.map(o=>{
+    const on=(fatto?S.scelte[ruolo]:ui.tieni).includes(o.id);
+    return oggLi(o,ruolo,false, fatto ? (on?'':'via') : 'tieni'+(on?' on':''));
+  }).join('')}</ul>`;
+  if(!fatto) h+=`<p class="nota">Tocca un oggetto per tenerlo o buttarlo. L'idolo resta per forza.</p><p><button class="play" data-a="conferma" ${ui.tieni.length===need?'':'disabled'}>Conferma</button></p>`;
+  return h+`</div><div class="stive">${stivaG(lui())}</div>`;
+}
+function fineG(){
+  const r=S.risultato;
+  const lato=p=>`<div class="panel"><h3>${p===ruolo?'Tu':esc(nome(S,p))} · ${r[p]}</h3><ul class="stiva">${S.stive[p].map(o=>oggLi(o,p,true,S.scelte[p].includes(o.id)?'':'via')).join('')||'<li>niente</li>'}</ul></div>`;
+  return `<div class="stive">${lato(ruolo)}${lato(lui())}</div>
+<div class="panel centro"><h3>${r.w?(r.w===ruolo?'🏆 Il bottino è tuo':'💀 Ti hanno spennato'):'⚔️ Pareggio'}</h3><button class="play" data-a="rivincita">Rivincita (nuova nave)</button></div>`;
+}
+
+/* ---------- vista foglio ---------- */
+function X(t,c='',o={}){ return {t:t==null?'':t, c, ...o}; }
+function cx(c){ return SEMI[c.s].x+'-'+RANK(c.r); }
+function cxVis(c,m){ return m==='tutto'?cx(c):m==='seme'?SEMI[c.s].x+'-??':'##-??'; }
+function colL(i){ return String.fromCharCode(65+i); }
+function chrome(nomeFile, grid, sheet){
+  const sheets=[['Allocazione','vista:foglio'],['Grafico','vista:gioco'],['MiFID_scaduti','boss']];
+  return `<div class="xw">
+<div class="xt"><span>Salvataggio automatico ● &nbsp; 💾 ↶ ↷</span><b>${nomeFile} - Excel</b><span>Area Consulenza</span></div>
+<div class="xm">${['File','Home','Inserisci','Disegno','Layout di pagina','Formule','Dati','Revisione','Visualizza','Guida'].map((t,i)=>`<span class="${i===1?'on':''}">${t}</span>`).join('')}</div>
+<div class="xr">
+ <div class="xg"><div class="ic">📋 <span>Incolla</span></div><span>Appunti</span></div>
+ <div class="xg"><div class="ic"><span class="bx">Calibri</span><span class="bx">11</span></div><div class="ic"><b>G</b><i>C</i><u>S</u> ▦ 🎨</div><span>Carattere</span></div>
+ <div class="xg"><div class="ic">≡ ≡ ≡ ⇥</div><div class="ic">↵ Testo a capo</div><span>Allineamento</span></div>
+ <div class="xg"><div class="ic"><span class="bx">Generale ▾</span></div><div class="ic">€ % 000 ,0</div><span>Numeri</span></div>
+ <div class="xg"><div class="ic">▤ Formattazione condizionale</div><div class="ic">▦ Formatta come tabella</div><span>Stili</span></div>
+ <div class="xg"><div class="ic">Σ Somma automatica</div><div class="ic">⇅ Ordina e filtra 🔍</div><span>Modifica</span></div>
+</div>
+<div class="xf"><div class="nb">${esc(ui.ref)}</div><div class="fxl">fx</div><div class="fxv">${esc(ui.fx)}</div></div>
+<div class="xgrid">${grid}</div>
+<div class="xs">${sheets.map(([n,a])=>`<span class="${n===sheet?'on':''}" data-a="${a}">${n}</span>`).join('')}<span>＋</span></div>
+<div class="xst"><span>${ui.msg?esc(ui.msg):'Pronto'}</span><span>Media: 41,7 &nbsp; Conteggio: 128 &nbsp; Somma: 5.337 &nbsp; ▦ ▣ ▤ &nbsp; 100%</span></div>
+</div>`;
+}
+function griglia(R,minRighe=40){
+  const NC=Math.max(10,...R.map(r=>r.reduce((a,c)=>a+(c.span||1),0)));
+  let h=`<table class="xl"><colgroup><col style="width:40px"><col style="width:150px">${'<col style="width:104px">'.repeat(NC-1)}</colgroup>
+<thead><tr><th></th>${Array.from({length:NC},(_,i)=>`<th>${colL(i)}</th>`).join('')}</tr></thead><tbody>`;
+  const tot=Math.max(minRighe,R.length+8);
+  for(let ri=0;ri<tot;ri++){
+    const row=R[ri]||[]; let used=0;
+    h+=`<tr><th>${ri+1}</th>`;
+    for(const c of row){
+      const sp=c.span||1, ref=colL(used)+(ri+1);
+      h+=`<td class="${c.c}" ${sp>1?`colspan="${sp}"`:''} data-ref="${ref}" ${c.a?`data-a="${c.a}"`:''}>${c.html?c.t:esc(c.t)}</td>`;
+      used+=sp;
+    }
+    for(;used<NC;used++) h+=`<td data-ref="${colL(used)}${ri+1}"></td>`;
+    h+='</tr>';
+  }
+  return h+'</tbody></table>';
+}
+function lobbyX(){
+  const R=[
+    [X('ALLOCAZIONE LOTTI – DESK RECUPERO','h1',{span:4})],[],
+    [X('Operatore','lab'),X(`<input id="nomeIn" maxlength="20" value="${esc(ls('bottino:nome')||'')}">`,'',{html:true,span:2})],
+    [X('Nuova pratica','lab'),X('APRI NUOVA PRATICA','btn',{a:'crea',span:2})],[],
+    [X('Codice pratica','lab'),X(`<input id="codIn" maxlength="4" value="${esc(ui.codPre)}" style="text-transform:uppercase">`,'',{html:true})],
+    [X('','lab'),X('CARICA PRATICA','btn',{a:'entra',span:2})],[],
+    [X('Note','lab'),X('Inserire operatore e aprire o caricare una pratica di allocazione.','dim',{span:6})]
+  ];
+  return chrome('Allocazione_Lotti_Q4.xlsx', griglia(R), 'Allocazione');
+}
+function renderFoglio(){
+  const s=S, me=ruolo, op=lui(), R=[];
+  R.push([X('ALLOCAZIONE LOTTI – DESK RECUPERO','h1',{span:4}),X(''),X(''),X(''),X('Aggiornato','lab'),X(new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}),'num')]);
+  R.push([X('Pratica','lab'),X(codice,'b'),X('Operatore','lab'),X(nome(s,me)),X('Controparte','lab'),X(s.giocatori[op]?nome(s,op):'n.d.'),X('Asta n.','lab'),X(`${Math.min(s.turno+1,N_OGGETTI)}/${N_OGGETTI}`,'num'),X('Regole','btn2',{a:'regole'}),X('Chiudi','btn2',{a:'esci'})]);
+  R.push([X('Stato','lab'),X(statoX(),'rosso',{span:9})]);
+  if(ui.regole){
+    ['Lotti 15: valore visibile solo sul lotto in asta; del successivo solo asset class.',`Ordini: ${MANO_INIZ} in portafoglio, 3 per asta (ordini 1-2 esecuzione contestuale, ordine 3 riservato). Reintegro ${PESCA} per asta, max ${MANO_MAX}.`,`Rating: somma valori (fig. 10, A 11) + bonus: ${COMBO.map(c=>c[2]+' +'+c[3]).join(' · ')} · GAR derivato +${BONUS_ARMA} (controvalore derivato /2).`,'Rating maggiore aggiudica. Parità = stralcio.','Desk OTC: 1 acquisto per asta. S = qualsiasi posizione, M ≥ 20, L ≥ 40. Liquidi x2, Private eq. = 30, Sofferenze non accettate.','Liq. breve: liquidabile per +1 ordine.','Chiusura: mantenere 5 posizioni. Sofferenze non dismettibili. Vince controvalore maggiore.']
+      .forEach((t,i)=>R.push([X(i?'':'Normativa','lab'),X(t,'',{span:9})]));
+  }
+  R.push([]);
+  if(s.fase==='attesa'){ R.push([X('Codice pratica','lab'),X(codice,'h1'),X('da comunicare alla controparte','dim',{span:4})]); return chrome('Allocazione_Lotti_Q4.xlsx',griglia(R),'Allocazione'); }
+  R.push([X('KPI','sez',{span:10})]);
+  R.push([X('Controvalore op.','lab'),X(totVis(me),'num'),X('Controvalore ctp.','lab'),X(totVis(op),'num'),X('Posizioni op.','lab'),X(s.stive[me].length,'num'),X('Posizioni ctp.','lab'),X(s.stive[op].length,'num'),X('Stralci','lab'),X(s.mare.length,'num')]);
+  R.push([]);
+  if(s.fase==='gioco'){
+    const it=s.coda[s.turno], nx=s.coda[s.turno+1], gO=s.giocate[op], gM=s.giocate[me], scop=s.fase_turno==='seconda';
+    R.push([X('LOTTO IN ASTA','sez',{span:10})]);
+    R.push([X('Codice','lab'),X('Asset class','lab'),X('Controvalore','lab'),X('Note','lab',{span:4}),X('Successivo','lab'),X('Asset class','lab'),X('Controvalore','lab')]);
+    R.push([X(it.id,'b'),X(CAT[it.cat].x),X(valTxt(it,false),'num'),X(it.cat==='idolo'?'Non dismettibile':it.cat==='mappa'?'Valutazione a chiusura':'','dim',{span:4}),X(nx?nx.id:'—'),X(nx?CAT[nx.cat].x:'—'),X(nx?'n.d.':'—','num')]);
+    R.push([]);
+    R.push([X('ORDINI IN ESECUZIONE','sez',{span:10})]);
+    R.push([X('Soggetto','lab'),X('Ordine 1','lab'),X('Ordine 2','lab'),X('Ordine 3','lab'),X('Garanzia','lab'),X('Ordini resid.','lab'),X('Acq. OTC','lab')]);
+    const ap=(g,vis)=>[0,1].map(k=>X(g.c1?(vis?cx(g.c1[k]):'INVIATO'):'—','cx'));
+    R.push([X('Ctp. '+nome(s,op)),...ap(gO,scop),X(gO.c2?'INVIATO':'—','cx'),X('n.d.','num'),X(s.mani[op].length,'num'),X(gO.comprato?1:0,'num')]);
+    R.push([X('Op. '+nome(s,me)),...ap(gM,true),X(gM.c2?cx(gM.c2):'—','cx'),X(gM.arma?1:0,'num'),X(s.mani[me].length,'num'),X(gM.comprato?1:0,'num')]);
+    R.push([]);
+    R.push([X('ORDINI DISPONIBILI','sez',{span:10})]);
+    const mano=s.mani[me];
+    R.push([X('Ordine','lab'),...mano.map((c,i)=>X(cx(c),'cx'+(ui.sel.includes(i)?' sel':''),{a:'sel:'+i}))]);
+    R.push([X('Valore unitario','lab'),...mano.map(c=>X(valCarta(c),'num'))]);
+    if(s.fase_turno==='seconda' && !gM.c2){
+      const ar=armiLibere();
+      if(ar.length) R.push([X('Garanzia derivati','lab'),...ar.map(a=>X(`${a.id}: ${ui.arma===a.id?1:0}`,'btn2',{a:'arma:'+a.id}))]);
+    }
+    const pr=anteprima();
+    R.push([X('Rating stimato','lab'),X(pr?pr.p:'—','num'),X(pr?pr.tags.map(t=>TAGS[t].x).join(' '):'','dim',{span:2}),
+            X(puoGiocare()?(s.fase_turno==='prima'?`ESEGUI ORDINI 1-2 (${ui.sel.length}/2)`:'ESEGUI ORDINE 3'):'—', puoGiocare()&&ui.sel.length===(s.fase_turno==='prima'?2:1)?'btn':'dim', puoGiocare()?{a:'gioca',span:2}:{span:2})]);
+    R.push([]);
+  }
+  if(s.fase==='scelta' || s.fase==='fine'){
+    const fine=s.fase==='fine';
+    R.push([X(fine?'ESITO SESSIONE':'CHIUSURA PORTAFOGLIO','sez',{span:10})]);
+    if(fine) R.push([X('Controvalore op.','lab'),X(s.risultato[me],'num b'),X('Controvalore ctp.','lab'),X(s.risultato[op],'num'),X('Esito','lab'),X(s.risultato.w?(s.risultato.w===me?'POSITIVO':'NEGATIVO'):'NEUTRO',s.risultato.w===me?'verde':'rosso'),X('NUOVA SESSIONE','btn',{a:'rivincita',span:2})]);
+    for(const p of fine?[me,op]:[me]){
+      R.push([X(p===me?'Portafoglio operatore':'Portafoglio controparte','b'),X('Asset class','lab'),X('Controvalore','lab'),X('Mantieni','lab')]);
+      const keep = s.scelte[p] || (p===me ? ui.tieni : []);
+      s.stive[p].forEach(o=>{
+        const on=keep.includes(o.id), edit=!fine && p===me && !s.scelte[me];
+        R.push([X(o.id+' '+o.nome), X(CAT[o.cat].x), X(valTxt(o,fine),'num'), X(on?1:0, edit?'btn2':'num', edit?{a:'tieni:'+o.id}:{})]);
+      });
+    }
+    if(!fine && !s.scelte[me]) R.push([X('Selezionate','lab'),X(`${ui.tieni.length}/${Math.min(TIENI,s.stive[me].length)}`,'num'),X(''),X('CONFERMA','btn',{a:'conferma'})]);
+    R.push([]);
+  }
+  if(s.esito){
+    const e=s.esito;
+    R.push([X('ESITO ASTA PRECEDENTE','sez',{span:10})]);
+    R.push([X('Lotto','lab'),X(e.item.id+' '+CAT[e.item.cat].x),X('Controvalore','lab'),X(valTxt(e.item,s.fase==='fine'),'num')]);
+    R.push([X('Soggetto','lab'),X('Ordine 1','lab'),X('Ordine 2','lab'),X('Ordine 3','lab'),X('Flag','lab'),X('Rating','lab'),X('Aggiudicato','lab')]);
+    for(const p of [op,me]) R.push([X((p===me?'Op. ':'Ctp. ')+nome(s,p)),...e[p].carte.map(c=>X(cx(c),'cx')),X(e[p].tags.map(t=>TAGS[t].x).join(' ')),X(e[p].p,'num'),X(e.w===p?1:0,'num')]);
+    R.push([]);
+  }
+  if(s.fase==='gioco'){
+    const g=s.giocate[me], can=!g.comprato && !g.c2;
+    R.push([X('DESK OTC','sez',{span:10})]);
+    R.push([X('Pacchetto','lab'),X('Titolo 1','lab'),X('Titolo 2','lab'),X('Titolo 3','lab'),X('Soglia min.','lab'),X('Comando','lab')]);
+    s.banco.forEach((l,i)=>{
+      const L=LOTTI[l.tipo];
+      R.push([X(L.x,ui.acquisto===i?'b':''),...[0,1,2].map(k=>X(l.carte[k]?cxVis(l.carte[k],L.vis[k]):'','cx')),X(L.min,'num'),
+              can?X(ui.acquisto===i?'ANNULLA':'ACQUISTA','btn',{a:'compra:'+i}):X('—','dim')]);
+    });
+    if(ui.acquisto!=null){
+      const el=eleggibili();
+      R.push([X('Regola con','lab'),...(el.length?el.map(o=>X(`${o.id} (${pagamento(o)})`,'btn2',{a:'paga:'+o.id})):[X('Nessuna posizione idonea','rosso',{span:3})])]);
+    }
+    R.push([]);
+    for(const p of [me,op]){
+      R.push([X(p===me?'PORTAFOGLIO OPERATORE':'PORTAFOGLIO CONTROPARTE','sez',{span:10})]);
+      R.push([X('Posizione','lab'),X('Asset class','lab'),X('Controvalore','lab'),X('Val. regolam.','lab'),X('Utilizzata','lab'),X('Comando','lab')]);
+      s.stive[p].forEach(o=>{
+        const mang = p===me && o.cat==='cibo' && !s.giocate[me].c2 && s.mani[me].length<MANO_MAX;
+        const pv=pagamento(o);
+        R.push([X(o.id+' '+o.nome),X(CAT[o.cat].x),X(valTxt(o,false),'num'),X(pv===null?'n.a.':pv,'num'),X(o.usata?1:0,'num'),mang?X('LIQUIDA','btn2',{a:'mangia:'+o.id}):X('')]);
+      });
+      if(!s.stive[p].length) R.push([X('nessuna posizione','dim',{span:3})]);
+      R.push([]);
+    }
+  }
+  R.push([X('REGISTRO OPERAZIONI','sez',{span:10})]);
+  s.log.slice(0,12).forEach(l=>R.push([X(new Date(l.t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})),X(l.x,'',{span:9})]));
+  return chrome('Allocazione_Lotti_Q4.xlsx', griglia(R), 'Allocazione');
+}
+
+/* ---------- schermata MiFID (Esc) ---------- */
+function renderBoss(){
+  let seed=7; const r=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const cog=['Rossi','Bianchi','Ferrari','Esposito','Romano','Colombo','Ricci','Marino','Greco','Bruno','Gallo','Conti','De Luca','Mancini','Costa','Giordano','Rizzo','Lombardi','Moretti','Barbieri','Fontana','Santoro','Mariani','Rinaldi','Caruso','Ferrara','Galli','Martini','Leone','Longo'];
+  const ini='ABCDEFGLMNPRSTV', prof=['Prudente','Moderato','Equilibrato','Dinamico'];
+  const R=[[X('NDG','sez'),X('Cliente','sez'),X('Profilo','sez'),X('Ultima MiFID','sez'),X('Scadenza','sez'),X('Giorni scad.','sez'),X('Stato','sez'),X('Contattato','sez'),X('Esito','sez'),X('Note','sez')]];
+  cog.forEach(c=>{
+    const y=2023+Math.floor(r()*2), m=1+Math.floor(r()*12), d=1+Math.floor(r()*28);
+    const ult=`${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`, sc=`${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y+2}`;
+    const gg=Math.max(3,Math.floor((Date.now()-new Date(y+2,m-1,d))/864e5));
+    const ct=r()<.4?1:0;
+    R.push([X(String(4000000+Math.floor(r()*999999))),X(`${c} ${ini[Math.floor(r()*ini.length)]}.`),X(prof[Math.floor(r()*4)]),X(ult,'num'),X(sc,'num'),X(gg,'num'),X('SCADUTO','rosso'),X(ct,'num'),X(ct?(r()<.5?'Appuntamento':'Richiamare'):'Da contattare'),X(r()<.3?'Verificare adeguatezza':'','dim')]);
+  });
+  return chrome('Clienti_MiFID_scaduti.xlsx', griglia(R,40), 'MiFID_scaduti');
+}
+
+/* ---------- render e input ---------- */
+function render(){
+  const app=document.getElementById('app');
+  const xl = boss || vista==='foglio';
+  document.body.className = xl ? 'vx' : 'vg';
+  document.title = boss ? 'Clienti_MiFID_scaduti.xlsx - Excel' : 'Allocazione_Lotti_Q4.xlsx - Excel';
+  const nomeV=document.getElementById('nomeIn')?.value, codV=document.getElementById('codIn')?.value;
+  if(codV!=null) ui.codPre=codV;
+  if(boss){ app.innerHTML=renderBoss(); return; }
+  if(!S || !ruolo){
+    const att=document.activeElement, idAtt=att&&att.id, pos=att&&att.selectionStart;
+    app.innerHTML = xl ? lobbyX() : lobbyG();
+    if(nomeV!=null) document.getElementById('nomeIn').value=nomeV;
+    if(idAtt && document.getElementById(idAtt)){
+      const f=document.getElementById(idAtt); f.focus();
+      try{ f.setSelectionRange(pos,pos); }catch(e){}
+    }
+  } else {
+    aggiornaUi();
+    app.innerHTML = xl ? renderFoglio() : renderGioco();
+  }
+  if(!xl && ui.msg) app.insertAdjacentHTML('beforeend',`<div class="toast">${esc(ui.msg)}</div>`);
+}
+
+document.addEventListener('click',e=>{
+  const td=e.target.closest('td[data-ref]');
+  if(td){
+    ui.ref=td.dataset.ref; ui.fx=td.querySelector('input')?td.querySelector('input').value:td.textContent;
+    // aggiorna solo la barra della formula, senza ridisegnare (non perde il cursore)
+    const nb=document.querySelector('.nb'), fx=document.querySelector('.fxv');
+    if(nb) nb.textContent=ui.ref; if(fx) fx.textContent=ui.fx;
+    document.querySelectorAll('td.sel-cella').forEach(x=>x.classList.remove('sel-cella'));
+    td.classList.add('sel-cella');
+  }
+  if(e.target.tagName==='INPUT') return;
+  const el=e.target.closest('[data-a]');
+  if(!el) return;
+  if(el.disabled) return;
+  const i=el.dataset.a.indexOf(':');
+  const a=i<0?el.dataset.a:el.dataset.a.slice(0,i), v=i<0?null:el.dataset.a.slice(i+1);
+  gestisci(a,v);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ boss=!boss; render(); }
+  if(e.key==='Enter' && e.target.id==='codIn') entra(e.target.value);
+  if(e.key==='Enter' && e.target.id==='nomeIn') document.getElementById('codIn')?.focus();
+});
+
+function gestisci(a,v){
+  const me=ruolo;
+  switch(a){
+    case 'crea': return crea();
+    case 'entra': return entra(document.getElementById('codIn')?.value);
+    case 'esci': return esci();
+    case 'vista': vista=v; ls('bottino:vista',v); boss=false; return render();
+    case 'boss': boss=!boss; return render();
+    case 'regole': ui.regole=!ui.regole; return render();
+    case 'sel': {
+      const i=+v, max=S&&S.fase_turno==='prima'?2:1, k=ui.sel.indexOf(i);
+      if(k>=0) ui.sel.splice(k,1);
+      else { if(ui.sel.length>=max) ui.sel.shift(); ui.sel.push(i); }
+      return render();
+    }
+    case 'arma': ui.arma = ui.arma===v ? null : v; return render();
+    case 'compra': ui.acquisto = ui.acquisto===+v ? null : +v; return render();
+    case 'annulla': ui.acquisto=null; return render();
+    case 'tieni': {
+      const o=S.stive[me].find(x=>x.id===v); if(!o || S.scelte[me]) return;
+      if(o.cat==='idolo') return toast("L'idolo maledetto non si può buttare");
+      const k=ui.tieni.indexOf(v);
+      if(k>=0) ui.tieni.splice(k,1);
+      else if(ui.tieni.length<Math.min(TIENI,S.stive[me].length)) ui.tieni.push(v);
+      else return toast(`Ne tieni al massimo ${TIENI}: togline uno prima`);
+      return render();
+    }
+    case 'gioca': {
+      const idx=[...ui.sel], arma=ui.arma;
+      return azione(s=>regolaGioca(s,me,idx,arma),'Mossa non valida').then(ok=>{ if(ok){ ui.sel=[]; ui.arma=null; render(); } });
+    }
+    case 'paga': {
+      const li=ui.acquisto;
+      return azione(s=>regolaCompra(s,me,li,v),'Acquisto non riuscito').then(()=>{ ui.acquisto=null; render(); });
+    }
+    case 'mangia': return azione(s=>regolaMangia(s,me,v),'Non puoi mangiarlo ora');
+    case 'conferma': { const keep=[...ui.tieni]; return azione(s=>regolaScegli(s,me,keep),'Scelta non valida'); }
+    case 'rivincita': return azione(s=>{
+      if(s.fase!=='fine') return false;
+      const ns=nuovoStato(s.giocatori); for(const k of Object.keys(s)) delete s[k]; Object.assign(s,ns);
+    });
+  }
+}
+
+// avvio
+const qc=new URLSearchParams(location.search).get('c');
+if(qc){
+  const c=qc.toUpperCase(); ui.codPre=c;
+  if(ls('bottino:'+c)) apri(c); else render();
+} else render();
+
+} // fine client
+</script>
+</body>
+</html>
